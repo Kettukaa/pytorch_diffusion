@@ -79,7 +79,7 @@ def denoising_step(x, t, noise_func, *,
 
     # sample - return mean for t==0
     #noise = torch.randn_like(x)
-    noise = noise_func(t[0])
+    noise = noise_func(int(t[0]))
 
     mask = 1-(t==0).float()
     mask = mask.reshape((x.shape[0],)+(1,)*(len(x.shape)-1))

@@ -59,5 +59,5 @@ class Noise:
     def randn(self, n):
         '''Returns a two element list containing both noise tensors at the nth state'''
         self.set_states(n)
-        return [torch.randn(self.shape, generator=g, device=self.device) for g in [self.g1, self.g2]]
+        return torch.stack([torch.randn(self.shape, generator=g, device=self.device) for g in [self.g1, self.g2]])
 
