@@ -51,7 +51,7 @@ def diffusion_step(x, t, *,
     )
 
 
-def denoising_step(x, t, *,
+def denoising_step(x, t, noise_func, *,
                    model,
                    logvar,
                    sqrt_recip_alphas_cumprod,
@@ -78,7 +78,9 @@ def denoising_step(x, t, *,
     logvar = extract(logvar, t, x.shape)
 
     # sample - return mean for t==0
-    noise = torch.randn_like(x)
+    #noise = torch.randn_like(x)
+    noise = noise_func(t)
+
     mask = 1-(t==0).float()
     mask = mask.reshape((x.shape[0],)+(1,)*(len(x.shape)-1))
     sample = mean + mask*torch.exp(0.5*logvar)*noise
@@ -204,7 +206,7 @@ class Diffusion(object):
         return diffusion
 
 
-    def denoise(self, n, n_steps=None, x=None, curr_step=None,
+    def denoise(self, n, noise_func, n_steps=None, x=None, curr_step=None,
                 progress_bar=lambda i, total=None: i,
                 callback=lambda x, i, x0=None: None):
         with torch.no_grad():
@@ -226,6 +228,7 @@ class Diffusion(object):
                 t = (torch.ones(n)*i).to(self.device)
                 x, x0 = denoising_step(x,
                                        t=t,
+                                       noise_func=noise_func,
                                        model=self.model,
                                        logvar=self.logvar,
                                        sqrt_recip_alphas_cumprod=self.sqrt_recip_alphas_cumprod,
