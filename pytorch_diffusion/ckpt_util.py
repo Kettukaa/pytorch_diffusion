@@ -1,5 +1,6 @@
 import os, hashlib
 import requests
+import gdown
 from tqdm import tqdm
 
 URL_MAP = {
@@ -11,6 +12,8 @@ URL_MAP = {
     "ema_lsun_cat": "https://heibox.uni-heidelberg.de/f/0701aac3aa69457bbe34/?dl=1",
     "lsun_church": "https://heibox.uni-heidelberg.de/f/2711a6f712e34b06b9d8/?dl=1",
     "ema_lsun_church": "https://heibox.uni-heidelberg.de/f/44ccb50ef3c6436db52e/?dl=1",
+    "ema_foxes":"https://drive.google.com/u/0/uc?export=download&confirm=KXiS&id=1l4CNwZPtXxMp8dyVV-bTbA_qo_eFqDPo",
+    "ema_foxesl":"https://drive.google.com/uc?export=download&id=1w3Jnt4u6yvBfvYKoPahT0-snwiybeW1r"
 }
 CKPT_MAP = {
     "cifar10": "diffusion_cifar10_model/model-790000.ckpt",
@@ -21,6 +24,8 @@ CKPT_MAP = {
     "ema_lsun_cat": "ema_diffusion_lsun_cat_model/model-1761000.ckpt",
     "lsun_church": "diffusion_lsun_church_model/model-4432000.ckpt",
     "ema_lsun_church": "ema_diffusion_lsun_church_model/model-4432000.ckpt",
+    "ema_foxes": "ema_diffusion_foxes_model/model-1768000.ckpt",
+    "ema_foxesl": "ema_diffusion_foxesl_model/model-5623000.ckpt"
 }
 MD5_MAP = {
     "cifar10": "82ed3067fd1002f5cf4c339fb80c4669",
@@ -36,6 +41,9 @@ MD5_MAP = {
 def download(url, local_path, chunk_size = 1024):
     os.makedirs(os.path.split(local_path)[0], exist_ok=True)
     with requests.get(url, stream = True) as r:
+        # with open(local_path, 'wb') as f:
+        #     resp = requests.get(url)
+        #     f.write(response.content)
         total_size = int(r.headers.get("content-length", 0))
         with tqdm(total = total_size, unit = "B", unit_scale = True) as pbar:
             with open(local_path, "wb") as f:
@@ -50,13 +58,33 @@ def md5_hash(path):
     return hashlib.md5(content).hexdigest()
 
 def get_ckpt_path(name, root=None, check=False):
+    check=False
+    print('a')
     assert name in URL_MAP
     cachedir = os.environ.get("XDG_CACHE_HOME", os.path.expanduser("~/.cache"))
     root = root if root is not None else os.path.join(cachedir, "diffusion_models_converted")
     path = os.path.join(root, CKPT_MAP[name])
     if not os.path.exists(path) or (check and not md5_hash(path)==MD5_MAP[name]):
         print("Downloading {} model from {} to {}".format(name, URL_MAP[name], path))
-        download(URL_MAP[name], path)
-        md5 = md5_hash(path)
-        assert md5==MD5_MAP[name], md5
+
+        if name == 'ema_foxes':
+            print(path)
+            try:
+                #print('/'.join(path.split(r'/')[0:-1]))
+                os.makedirs('/'.join(path.split(r'/')[0:-1]))
+            except Exception:
+                pass
+            gdown.download('https://drive.google.com/uc?export=download&id=1l4CNwZPtXxMp8dyVV-bTbA_qo_eFqDPo', path, quiet=False)
+        elif name == 'ema_foxesl':
+            print(path)
+            try:
+                os.makedirs('/'.join(path.split(r'/')[0:-1]))
+            except Exception:
+                pass
+            gdown.download('https://drive.google.com/uc?export=download&id=1w3Jnt4u6yvBfvYKoPahT0-snwiybeW1r', path, quiet=False)
+
+        else:
+            download(URL_MAP[name], path, quiet=False)
+            md5 = md5_hash(path)
+            #assert md5==MD5_MAP[name], md5
     return path

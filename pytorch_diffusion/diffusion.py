@@ -153,12 +153,25 @@ class Diffusion(object):
             "attn_resolutions": (16,),
             "dropout": 0.0,
         }
+        lsunl_cfg = {
+            "resolution": 512,
+            "in_channels": 3,
+            "out_ch": 3,
+            "ch": 128,
+            "ch_mult": (1,1,2,2,4,4),
+            "num_res_blocks": 2,
+            "attn_resolutions": (16,),
+            "dropout": 0.0,
+        }
+
 
         model_config_map = {
             "cifar10": cifar10_cfg,
             "lsun_bedroom": lsun_cfg,
             "lsun_cat": lsun_cfg,
             "lsun_church": lsun_cfg,
+            "foxes":lsun_cfg,
+            'foxesl':lsunl_cfg
         }
 
         diffusion_config = {
@@ -172,6 +185,8 @@ class Diffusion(object):
             "lsun_bedroom": "fixedsmall",
             "lsun_cat": "fixedsmall",
             "lsun_church": "fixedsmall",
+            "foxes" : 'fixedsmall',
+            'foxesl': 'fixedsmall'
         }
         ema = name.startswith("ema_")
         basename = name[len("ema_"):] if ema else name
