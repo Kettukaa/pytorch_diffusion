@@ -225,7 +225,6 @@ class Diffusion(object):
                 x = x.to(self.device)
 
             for i in progress_bar(reversed(range(curr_step-n_steps, curr_step)), total=n_steps):
-                print(i)
                 t = (torch.ones(n)*i).to(self.device)
                 x, x0 = denoising_step(x,
                                        t=t,
